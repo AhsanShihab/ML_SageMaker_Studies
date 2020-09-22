@@ -23,7 +23,7 @@ def model_fn(model_dir):
 
     # Determine the device and construct the model.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = BinaryClassifier(model_info['input_features'], model_info['hidden_dim'], model_info['output_dim'])
+    model = BinaryClassifier(model_info['input_features'], model_info['hidden_dim_0'],model_info['hidden_dim_1'], model_info['output_dim'])
 
     # Load the stored model parameters.
     model_path = os.path.join(model_dir, 'model.pth')
@@ -116,7 +116,16 @@ if __name__ == '__main__':
     
     ## TODO: Add args for the three model parameters: input_features, hidden_dim, output_dim
     # Model Parameters
-    
+    parser.add_argument('--input_features', type=int, default=3, metavar='IN',
+                        help='number of input features to model (default: 3)')
+    parser.add_argument('--hidden_dim_0', type=int, default=10, metavar='H0',
+                        help='first hidden dim of model (default: 10)')
+    parser.add_argument('--hidden_dim_1', type=int, default=10, metavar='H1',
+                        help='second hidden dim of model (default: 10)')
+    parser.add_argument('--output_dim', type=int, default=1, metavar='OUT',
+                        help='output dim of model (default: 1)')
+    parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
+                        help='learning rate (default: 0.001)')
     
     # args holds all passed-in arguments
     args = parser.parse_args()
@@ -135,11 +144,11 @@ if __name__ == '__main__':
     ## TODO:  Build the model by passing in the input params
     # To get params from the parser, call args.argument_name, ex. args.epochs or ards.hidden_dim
     # Don't forget to move your model .to(device) to move to GPU , if appropriate
-    model = None
-
+    model = BinaryClassifier(args.input_features, args.hidden_dim_0, args.hidden_dim_1, args.output_dim).to(device)
+    
     ## TODO: Define an optimizer and loss function for training
-    optimizer = None
-    criterion = None
+    optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    criterion = torch.nn.BCELoss()
 
     # Trains the model (given line of code, which calls the above training function)
     train(model, train_loader, args.epochs, criterion, optimizer, device)
@@ -150,8 +159,9 @@ if __name__ == '__main__':
     with open(model_info_path, 'wb') as f:
         model_info = {
             'input_features': args.input_features,
-            'hidden_dim': <add_arg>,
-            'output_dim': <add_arg>,
+            'hidden_dim_0': args.hidden_dim_0,
+            'hidden_dim_1': args.hidden_dim_1,
+            'output_dim': args.output_dim,
         }
         torch.save(model_info, f)
         

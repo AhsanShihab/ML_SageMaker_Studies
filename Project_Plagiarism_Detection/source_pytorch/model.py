@@ -16,7 +16,7 @@ class BinaryClassifier(nn.Module):
     """
 
     ## TODO: Define the init function, the input params are required (for loading code in train.py to work)
-    def __init__(self, input_features, hidden_dim, output_dim):
+    def __init__(self, input_features, hidden_dim_0, hidden_dim_1, output_dim):
         """
         Initialize the model by setting up linear layers.
         Use the input parameters to help define the layers of your model.
@@ -26,7 +26,13 @@ class BinaryClassifier(nn.Module):
         """
         super(BinaryClassifier, self).__init__()
 
-        # define any initial layers, here
+        # layers
+        self.fc1 = nn.Linear(input_features, hidden_dim_0)
+        self.fc2 = nn.Linear(hidden_dim_0, hidden_dim_1)
+        self.fc3 = nn.Linear(hidden_dim_1, output_dim)
+        
+        self.drop = nn.Dropout(0.4)
+        self.sig = nn.Sigmoid()
         
 
     
@@ -39,6 +45,14 @@ class BinaryClassifier(nn.Module):
         """
         
         # define the feedforward behavior
+        x = F.relu(self.fc1(x))
+        x = self.drop(x)
+        
+        x = F.relu(self.fc2(x))
+        x = self.drop(x)
+        
+        x = self.fc3(x)
+        x = self.sig(x)
         
         return x
     
